@@ -1,0 +1,21 @@
+decl
+    integer a,b,c,d,e,f,g,h;
+enddecl
+
+read(a);
+b = a + 2;
+read(c);
+d = c - 7;
+read(e);
+f = 7 * e;
+read(g);
+h = 8 + g;
+
+write(a);
+write(b);
+write(c);
+write(d);
+write(e);
+write(f);
+write(g);
+write(h);

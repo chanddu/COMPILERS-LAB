@@ -1,0 +1,18 @@
+decl
+    boolean a,b,c;
+enddecl
+
+a = TRUE;
+b = TRUE;
+
+write(a OR b);
+write(a AND b);
+write(NOT a);
+
+a = FALSE;
+b = FALSE;
+
+write(a OR b);
+write(a AND b);
+write(NOT a);
+

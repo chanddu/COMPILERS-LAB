@@ -1,0 +1,23 @@
+decl
+
+integer b[5];
+
+enddecl
+
+integer main( ){
+
+decl
+
+boolean n,i ;
+
+enddecl
+
+begin
+
+n = (2<3);
+write(n+1);
+return 1;
+
+end
+
+}

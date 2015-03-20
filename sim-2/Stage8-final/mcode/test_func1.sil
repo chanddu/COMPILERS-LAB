@@ -1,0 +1,25 @@
+decl
+integer test(integer a);
+enddecl
+integer test(integer a)
+{
+decl
+integer b;
+enddecl
+begin
+b = 2;
+write(b);
+return 2;
+end
+}
+integer main()
+{
+decl
+integer a;
+enddecl
+begin
+a =  test(1);
+write(a);
+return 0;
+end
+}

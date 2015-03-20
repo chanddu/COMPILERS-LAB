@@ -1,0 +1,28 @@
+decl
+
+integer a,b[5];
+
+enddecl
+
+integer main( ){
+
+decl
+
+integer n;
+
+enddecl
+
+begin
+
+read (n);
+
+if(n%2==0)then
+	write(n);
+endif;
+
+
+return 1;
+
+end
+
+}

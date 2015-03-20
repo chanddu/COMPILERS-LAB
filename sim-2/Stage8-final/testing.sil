@@ -1,0 +1,25 @@
+decl
+
+integer a,b[5];
+
+enddecl
+
+integer main( ){
+
+decl
+
+integer n;
+boolean x,y;
+
+enddecl
+
+begin
+
+b[2] = 2;
+write(b[-31]);
+
+return 1;
+
+end
+
+}

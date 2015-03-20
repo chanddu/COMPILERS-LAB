@@ -1,0 +1,23 @@
+decl
+	integer f[10];
+	boolean x,y,g[12];
+	boolean r;
+enddecl
+integer main() {
+decl
+enddecl
+begin
+f[2]=3;
+f[3]=4;
+g[4]=3>4;
+r = true;
+x = false;
+y = true;
+if(r && x) then write(f[2]); else write(f[6]); endif;
+if(y || x) then write(f[2]); else write(f[3]); endif;
+if(!(! g[4])) then write(f[2]); else write(f[3]); endif;
+
+return 1;
+end
+
+}

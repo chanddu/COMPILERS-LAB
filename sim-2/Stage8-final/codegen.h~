@@ -1,0 +1,257 @@
+int getreg()
+{
+	regcount++;
+	if(regcount>=8)
+	{
+		printf("register count is exceeded\n");
+		exit(1);
+	}
+	return regcount;
+}
+
+int freereg()
+{
+	regcount--;
+	if(regcount < -1)
+	{
+		printf("trying to free invalid register\n");
+		exit(1);
+	}
+}
+
+int getlabel()
+{
+	label++;
+	return label;
+}
+
+int codegen(tnode *temp){
+	int temp_label;
+if(temp){
+switch(temp->TYPE){
+case DUMMY_TYPE :	
+	codegen(temp->Ptr1);
+	codegen(temp->Ptr2);
+	break;
+case VOID_TYPE : 
+	switch(temp->NODETYPE){
+		case READ_NODETYPE :
+			int r1 = getreg();
+			fprintf(fp, "\nIN R%d",r1);
+			if(temp->Ptr1->Gentry){
+				if((temp->Ptr1->Gentry->SIZE)>1){ 
+					fprintf(fp, "\nMOV R%d, %d",regcount, *(temp->Ptr1->Gentry->BINDING));
+					regcount++;
+					codegen(temp->Ptr1->Ptr1);
+					// THE LAST REGISTER CONTAINS ARRAY INDEX
+					fprintf(fp, "\nADD R%d, R%d",regcount-2,regcount-1);
+					regcount--;
+				}
+				else{
+					fprintf(fp, "\nMOV [%d], R%d", *(temp->Ptr1->Gentry->BINDING),r1);
+				}
+			}
+			else if(temp->Ptr1->Lentry){
+				fprintf(fp, "\nMOV R%d, %d", regcount, *(temp->Ptr1->Lentry->BINDING));
+				regcount++;
+			}
+			
+			fprintf(fp, "\nMOV [R%d], R%d",regcount-1, regcount-2);
+			regcount = regcount-2;
+			break;
+		case WRITE_NODETYPE :
+			codegen(temp->Ptr1);
+			fprintf(fp, "\nOUT R%d",regcount-1);
+			regcount--;
+			break;
+		case ID_NODETYPE :
+			if(temp->Gentry){
+				if((temp->Gentry->SIZE)>1)	{
+					fprintf(fp, "\nMOV R%d, %d",regcount, *(temp->Gentry->BINDING));
+					regcount++;
+					codegen(temp->Ptr1);
+					// now regcount-1 stores the array index
+					fprintf(fp, "\nADD R%d, R%d",regcount-2,regcount-1);
+					regcount--;
+				}
+				else{
+					fprintf(fp, "\nMOV R%d, %d", regcount, *(temp->Gentry->BINDING));
+					regcount++;
+				}
+			}
+			else if(temp->Lentry){
+				fprintf(fp, "\nMOV R%d, %d", regcount, *(temp->Lentry->BINDING));
+				regcount++;
+			}
+			
+			fprintf(fp, "\nMOV R%d, R%d", regcount, regcount-1);
+			regcount++;
+			fprintf(fp, "\nMOV R%d, [R%d]", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case IF_NODETYPE :
+			codegen(temp->Ptr1);
+			label = label + 2;
+			temp_label = label;
+			fprintf(fp, "\nJZ R%d, LABEL%d",regcount-1,temp_label-2);
+			regcount--;
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nJMP LABEL%d",temp_label-1);
+			fprintf(fp, "\nLABEL%d :",temp_label-2);
+			label++;
+			codegen(temp->Ptr3);
+			fprintf(fp, "\nLABEL%d :",temp_label-1);
+			label++;
+			break;
+		case WHILE_NODETYPE :
+			fprintf(fp, "\nLABEL%d :",label);
+			label=label+2;
+			temp_label = label-1;
+			codegen(temp->Ptr1);
+			fprintf(fp, "\nJZ R%d, LABEL%d",regcount-1, temp_label);
+			regcount--;
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nJMP LABEL%d",temp_label-1);
+			fprintf(fp, "\nLABEL%d :", temp_label);
+			break;
+		case RETURN_NODETYPE : 
+			fprintf(fp, "\n");
+			break;
+	}
+	break;
+case INT_TYPE : 
+	switch(temp->NODETYPE){
+		case NUMBER_NODETYPE : 
+			fprintf(fp, "\nMOV R%d, %d",regcount, temp->VALUE);
+			regcount++;
+			break;
+		case PLUS_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nADD R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case MINUS_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nSUB R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case MULT_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nMUL R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case DIV_NODETYPE :	
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nDIV R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case ASSIGN_NODETYPE :
+			if(temp->Ptr1->Lentry)	{
+				fprintf(fp, "\nMOV R%d, %d", regcount, *(temp->Ptr1->Lentry->BINDING));
+				regcount++;
+			}
+			else if(temp->Ptr1->Gentry)	{
+				if((temp->Ptr1->Gentry->SIZE)>1)	{
+					fprintf(fp, "\nMOV R%d, %d", regcount, *(temp->Ptr1->Gentry->BINDING));
+					regcount++;
+					codegen(temp->Ptr1->Ptr1);
+					fprintf(fp, "\nADD R%d, R%d", regcount-2, regcount-1);
+					regcount--;
+				}
+				else	{
+					fprintf(fp, "\nMOV R%d, %d", regcount, *(temp->Ptr1->Gentry->BINDING));
+					regcount++;
+				}
+			}
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nMOV [R%d], R%d", regcount-2, regcount-1);
+			regcount = regcount - 2;
+			break;
+		case MODULO_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nMOD R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		}
+	break;
+case BOOLEAN_TYPE : 
+	switch(temp->NODETYPE){
+		case NOT_NODETYPE :
+			codegen(temp->Ptr1);
+			fprintf(fp, "\nMOV R%d, 1",regcount);
+			regcount++;
+			fprintf(fp, "\nMOV R%d, 2",regcount);
+			regcount++;
+			fprintf(fp, "\nADD R%d, R%d", regcount-3, regcount-2);
+			fprintf(fp, "\nMOD R%d, R%d", regcount-3, regcount-1);
+			regcount = regcount -2 ;
+			break;
+		case LT_NODETYPE :	
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nLT R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case LE_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nLE R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case GT_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nGT R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case GE_NODETYPE :	
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nGE R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case EQ_NODETYPE :	
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nEQ R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case NE_NODETYPE :	
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nNE R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case AND_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nMUL R%d, R%d", regcount-2, regcount-1);
+			regcount--;
+			break;
+		case OR_NODETYPE :
+			codegen(temp->Ptr1);
+			codegen(temp->Ptr2);
+			fprintf(fp, "\nMOV R%d, 2", regcount);
+			regcount++;
+			fprintf(fp, "\nADD R%d, R%d", regcount-3, regcount-2);
+			fprintf(fp, "\nMOD R%d, R%d", regcount-3, regcount-1);
+			regcount = regcount - 2;
+			break;
+		case TRUE_NODETYPE :
+			fprintf(fp, "\nMOV R%d, %d", regcount, 1);
+			regcount++;
+			break;
+		case FALSE_NODETYPE : 
+			fprintf(fp, "\nMOV R%d, %d", regcount, 0);
+			regcount++;
+			break;
+	}
+	break;
+}
+}
+}

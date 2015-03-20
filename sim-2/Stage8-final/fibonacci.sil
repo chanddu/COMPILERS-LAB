@@ -1,0 +1,34 @@
+decl
+
+integer i,fib[100];
+
+enddecl
+
+integer main( ){
+
+decl
+
+integer n;
+
+enddecl
+
+begin
+
+read (n);
+i=2;
+fib[0] = 0;
+fib[1] = 1;
+ 
+while(i<=n)do
+	fib[i] = fib[i-1] + fib[i-2];
+	i = i+1;
+endwhile;
+
+	write(fib[i-1]);
+
+
+return 1;
+
+end
+
+}

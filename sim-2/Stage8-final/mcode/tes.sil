@@ -1,0 +1,8 @@
+decl
+
+integer a,b[5];
+
+enddecl
+
+b[1]=4;
+write(b[1])

@@ -1,0 +1,27 @@
+decl
+    integer refer(integer &x);
+enddecl
+
+integer refer(integer &x)
+{
+    decl
+        integer temp;
+    enddecl
+    begin
+        temp = x;
+        write(temp);
+        return 0;
+    end
+}
+
+integer main()
+{
+    decl
+        integer n,ret;
+    enddecl
+    begin
+        read(n);
+        ret = refer(n);
+        return 0;
+    end
+    }

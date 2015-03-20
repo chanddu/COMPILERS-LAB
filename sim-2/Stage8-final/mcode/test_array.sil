@@ -1,0 +1,16 @@
+decl
+    integer q[100],n,i;
+enddecl
+
+read(n);
+i = 0;
+while(i < n) do
+    read(q[i]);
+    i = i + 1;
+endwhile;
+
+i = 0;
+while(i < n) do
+    write(q[i]);
+    i = i + 1;
+endwhile;

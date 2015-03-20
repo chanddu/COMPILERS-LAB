@@ -1,0 +1,18 @@
+decl
+    integer a,b;
+enddecl
+
+read(a);
+read(b);
+if(a == b) then
+    write(a);
+    write(a+2);
+    write(a+4);
+else
+    if(b % 2 == 0) then
+        write(b);
+    endif;
+    write(b+2);
+    write(b+4);
+endif;
+

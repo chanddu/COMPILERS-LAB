@@ -1,0 +1,38 @@
+decl
+integer a,b,f1(integer c;boolean d),f2(integer c;boolean d);
+enddecl
+integer f1(integer c;boolean d)
+{
+decl
+integer a;
+enddecl
+begin
+a = 1;
+write(a);
+return a;
+end
+}
+integer f2(integer c;boolean d)
+{
+decl
+enddecl
+begin
+write(b);
+return b;
+end
+}
+integer main()
+{
+decl
+integer ret;
+enddecl
+begin
+a = 0;
+b = 5;
+ret = f1(0,TRUE);
+write(ret);
+ret = f2(0,FALSE);
+write(ret);
+return 0;
+end
+}
